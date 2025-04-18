@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\USER\StudioProjects\QRust\build\windows\x64\CMakeFiles\501b65867f0705c60abe3875145cf08f\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{98C095E8-2F97-35DE-9613-8E275FA9C50A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

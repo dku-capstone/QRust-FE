@@ -1,0 +1,10 @@
+^C:\USERS\USER\STUDIOPROJECTS\QRUST\BUILD\WINDOWS\X64\CMAKEFILES\501B65867F0705C60ABE3875145CF08F\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

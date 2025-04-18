@@ -1,0 +1,10 @@
+^C:\USERS\USER\STUDIOPROJECTS\QRUST\BUILD\WINDOWS\X64\CMAKEFILES\501B65867F0705C60ABE3875145CF08F\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/USER/StudioProjects/QRust/windows -BC:/Users/USER/StudioProjects/QRust/build/windows/x64 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/USER/StudioProjects/QRust/build/windows/x64/qrust.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
