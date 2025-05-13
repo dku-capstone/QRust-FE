@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'auth_screen.dart'; // 우리가 만든 로그인 페이지
+import 'authorize screen/auth_screen.dart';
+import 'authorize screen/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,12 +14,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'QRust',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        useMaterial3: true, // Material 3 스타일
       ),
       debugShowCheckedModeBanner: false,
-      home: AuthScreen(), // 로그인 화면을 앱 시작화면으로!
+      home: SplashScreen(), // 앱 시작 시 SplashScreen 먼저 실행
     );
   }
 }
+
 
