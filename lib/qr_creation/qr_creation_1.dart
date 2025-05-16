@@ -22,6 +22,7 @@ class _QrTypeSelectionScreenState extends State<QrTypeSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       key: _scaffoldKey,
       drawer: const Drawer(),
       body: SafeArea(

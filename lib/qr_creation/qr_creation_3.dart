@@ -18,6 +18,7 @@ class QrResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       drawer: const Drawer(),
       body: SafeArea(
         child: Column(

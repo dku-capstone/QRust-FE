@@ -45,6 +45,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       key: _scaffoldKey,
       drawer: const Drawer(),
       body: SafeArea(

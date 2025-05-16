@@ -1,4 +1,4 @@
-#Fri May 16 19:41:30 KST 2025
+#Fri May 16 22:43:15 KST 2025
 base.0=C\:\\Users\\USER\\StudioProjects\\QRust\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\USER\\StudioProjects\\QRust\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
 base.2=C\:\\Users\\USER\\StudioProjects\\QRust\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
