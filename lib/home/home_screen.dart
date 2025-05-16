@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qrust/widgets/navigation_appbar.dart';
 import 'package:qrust/widgets/drawer_menu.dart';
 import 'package:qrust/widgets/lower_navbar.dart';
+import 'package:qrust/qr_creation/qr_creation_1.dart';
+import 'package:qrust/qr_storage/qr_storage_screen.dart'; // ✅ 보관함 화면 import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -76,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 8), // overflow 방지
+          padding: const EdgeInsets.only(bottom: 8),
           child: Column(
             children: [
               Container(
@@ -161,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 duration: const Duration(milliseconds: 100),
                                 child: _buildScanCreateButton(
                                   label: 'QR 스캔하기',
-                                  imagePath: 'assets/pictures/qr_scan.png',
+                                  icon: Icons.qr_code_scanner,
                                 ),
                               ),
                             ),
@@ -178,9 +180,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               child: AnimatedScale(
                                 scale: _buttonScales['qr'] ?? 1.0,
                                 duration: const Duration(milliseconds: 100),
-                                child: _buildScanCreateButton(
-                                  label: 'QR 생성하기',
-                                  imagePath: 'assets/pictures/qr_code.png',
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const QrTypeSelectionScreen()),
+                                    );
+                                  },
+                                  child: _buildScanCreateButton(
+                                    label: 'QR 생성하기',
+                                    icon: Icons.qr_code,
+                                  ),
                                 ),
                               ),
                             ),
@@ -204,7 +215,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: _buildSimpleButton(
                             icon: Icons.save,
                             label: '보관함',
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const QrStorageScreen()),
+                              );
+                            },
                             keyId: 'save',
                           ),
                         ),
@@ -220,7 +237,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildScanCreateButton({required String label, required String imagePath}) {
+  Widget _buildScanCreateButton({
+    required String label,
+    required IconData icon,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -242,20 +262,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 100, // ← 줄였음
-            height: 100,
-            padding: const EdgeInsets.all(5),
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
-            ),
+            child: Icon(icon, size: 40, color: Colors.green),
           ),
           const SizedBox(height: 16),
           Text(
