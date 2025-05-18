@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginApi {
   static Future<bool> login({
@@ -18,17 +19,31 @@ class LoginApi {
         }),
       );
 
+      print('◀️ 응답 코드: ${response.statusCode}');
+      print('◀️ 응답 본문: ${response.body}');
+
       if (response.statusCode == 200) {
-        // 성공적으로 로그인함
+        // ✅ Set-Cookie 감지
+        final setCookie = response.headers['set-cookie'];
+        if (setCookie != null) {
+          print('🍪 Set-Cookie 감지됨: $setCookie');
+
+          // ✅ SharedPreferences에 쿠키 저장
+          final sessionCookie = setCookie.split(';').first; // 예: "JSESSIONID=abc..."
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('session_cookie', sessionCookie);
+          print('✅ session_cookie 저장 완료: $sessionCookie');
+        } else {
+          print('⚠️ Set-Cookie 헤더가 존재하지 않습니다.');
+        }
+
         return true;
       } else {
-        // 서버 응답은 왔지만 로그인 실패
         print("로그인 실패: ${response.statusCode} / ${response.body}");
         return false;
       }
     } catch (e) {
-      // 네트워크 에러 등
-      print("로그인 중 오류 발생: $e");
+      print("❌ 로그인 중 오류 발생: $e");
       return false;
     }
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:qrust/widgets/upper_navbar.dart';
 import 'package:qrust/home/home_screen.dart';
 
 class QrResultScreen extends StatelessWidget {
+  /// 서버에서 생성된 QR 이미지 URL
   final String url;
   final String title;
   final String? password;
@@ -26,24 +26,20 @@ class QrResultScreen extends StatelessWidget {
             NavigationAppBar(scaffoldKey: GlobalKey<ScaffoldState>()),
             const SizedBox(height: 20),
 
-            // ✅ step 안내 문구 (좌측)
+            // step 안내
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.0),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'QR 코드 생성 step3. QR 이미지 생성',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 15, color: Colors.grey),
                 ),
               ),
             ),
-
             const SizedBox(height: 28),
 
-            // ✅ 중앙 정렬 성공 메시지
+            // 성공 메시지
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.0),
               child: Center(
@@ -58,25 +54,20 @@ class QrResultScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 8),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.0),
               child: Center(
                 child: Text(
                   '안전한 QR 코드를 사용해 보세요.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 15, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
               ),
             ),
-
             const SizedBox(height: 24),
 
-            // ✅ 흰색 카드 안에 QR 코드 + 정보
+            // 네트워크 이미지로 QR 코드 출력
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
@@ -89,45 +80,38 @@ class QrResultScreen extends StatelessWidget {
                       color: Colors.black26,
                       blurRadius: 10,
                       offset: Offset(0, 4),
-                    )
+                    ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // ✅ QR 코드 (검정색)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: SizedBox(
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        url,
                         width: 180,
                         height: 180,
-                        child: QrImageView(
-                          data: url,
-                          version: QrVersions.auto,
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.green.withOpacity(0.8),
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.error_outline,
+                          size: 80,
+                          color: Colors.red,
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // ✅ QR 정보 (내부 좌측 정렬)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("제목: $title", style: const TextStyle(fontSize: 16)),
+                          Text('제목: \$title', style: const TextStyle(fontSize: 16)),
                           const SizedBox(height: 8),
-                          Text("URL: $url", style: const TextStyle(fontSize: 16)),
+                          Text('URL: \$url', style: const TextStyle(fontSize: 16)),
                           if (password != null && password!.isNotEmpty) ...[
                             const SizedBox(height: 8),
-                            Text("비밀번호: $password", style: const TextStyle(fontSize: 16)),
+                            Text('비밀번호: \$password', style: const TextStyle(fontSize: 16)),
                           ],
                         ],
                       ),
@@ -139,20 +123,16 @@ class QrResultScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // ✅ 다운로드 & 공유 버튼
+            // 다운로드 & 공유 버튼
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 다운로드 버튼
                 OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: 다운로드 기능
+                    // TODO: 다운로드 기능 구현
                   },
                   icon: const Icon(Icons.download, color: Colors.green),
-                  label: const Text(
-                    '다운로드',
-                    style: TextStyle(color: Colors.green),
-                  ),
+                  label: const Text('다운로드', style: TextStyle(color: Colors.green)),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.white,
                     side: const BorderSide(color: Colors.green),
@@ -160,16 +140,12 @@ class QrResultScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // 공유 버튼
                 OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: 공유하기 기능
+                    // TODO: 공유하기 기능 구현
                   },
                   icon: const Icon(Icons.share, color: Colors.green),
-                  label: const Text(
-                    '공유하기',
-                    style: TextStyle(color: Colors.green),
-                  ),
+                  label: const Text('공유하기', style: TextStyle(color: Colors.green)),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.white,
                     side: const BorderSide(color: Colors.green),
@@ -180,7 +156,6 @@ class QrResultScreen extends StatelessWidget {
             ),
 
             const Spacer(),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: FractionallySizedBox(
@@ -191,23 +166,17 @@ class QrResultScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()),
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
                             (route) => false,
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: const Text(
                       '홈으로 돌아가기',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
@@ -219,5 +188,3 @@ class QrResultScreen extends StatelessWidget {
     );
   }
 }
-
-
