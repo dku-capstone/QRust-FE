@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:qrust/widgets/upper_navbar.dart';
 
 class QrResultWarningScreen extends StatelessWidget {
@@ -72,7 +73,7 @@ class QrResultWarningScreen extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange[100],
+                        color: Colors.orangeAccent.withOpacity(0.2),
                         border: Border.all(color: Colors.grey),
                       ),
                       child: Row(
@@ -125,6 +126,7 @@ class QrResultWarningScreen extends StatelessWidget {
 
             const SizedBox(height: 36),
 
+            // ✅ 하단 버튼
             Expanded(
               child: Align(
                 alignment: Alignment.bottomCenter,
@@ -133,7 +135,6 @@ class QrResultWarningScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // ✅ 버튼 2개 높이 통일
                       FractionallySizedBox(
                         widthFactor: 0.85,
                         child: Row(
@@ -142,8 +143,15 @@ class QrResultWarningScreen extends StatelessWidget {
                               child: SizedBox(
                                 height: 50,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    // TODO: 접속 제한 또는 경고 처리
+                                  onPressed: () async {
+                                    final uri = Uri.parse(url);
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('⚠️ URL을 열 수 없습니다.')),
+                                      );
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.orange,
@@ -169,7 +177,7 @@ class QrResultWarningScreen extends StatelessWidget {
                                 height: 50,
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    // TODO: 신고 처리
+                                    // TODO: 신고 처리 로직
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
@@ -193,8 +201,6 @@ class QrResultWarningScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // ✅ 뒤로 버튼도 동일하게 유지
                       FractionallySizedBox(
                         widthFactor: 0.85,
                         child: SizedBox(

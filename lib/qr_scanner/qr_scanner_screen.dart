@@ -1,14 +1,10 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:qrust/features/qr_capture_util.dart';
-import 'package:qrust/features/qr_verification_service.dart';
-import 'package:qrust/features/qr_result_handler.dart';
 import 'package:qrust/features/qr_decoder_util.dart';
+import 'package:qrust/features/qr_result_handler.dart';
+import 'package:qrust/features/qr_verification_service.dart';
 import 'package:qrust/widgets/upper_navbar.dart';
-import 'package:qrust/qr_scanner/result_safe.dart';
-import 'package:qrust/qr_scanner/result_warning.dart';
-import 'package:qrust/qr_scanner/result_danger.dart';
 
 class QrScannerScreen extends StatefulWidget {
   const QrScannerScreen({super.key});
@@ -21,8 +17,8 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late CameraController _cameraController;
   bool _isCameraInitialized = false;
+  bool _isLoading = false;
   bool _hasAnalyzed = false;
-  String? scannedUrl;
 
   @override
   void initState() {
@@ -36,43 +32,82 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
     await _cameraController.initialize();
     setState(() {
       _isCameraInitialized = true;
+      _isLoading = false;
     });
 
-    _triggerAutoQrAnalysisOnce(); // ✅ 자동 분석 시작
+    _triggerAutoQrAnalysisOnce();
   }
 
   Future<void> _triggerAutoQrAnalysisOnce() async {
     if (_hasAnalyzed) return;
     _hasAnalyzed = true;
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final file = await _cameraController.takePicture();
       final bytes = await file.readAsBytes();
 
+      await _cameraController.dispose(); // 분석 중 카메라 정지
+
       final String? url = await QrDecoderUtil.decodeQrFromImagePath(file.path);
       if (url == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('QR 코드에서 바이트를 추출할 수 없습니다.')),
-        );
+        _showError('QR 코드에서 URL을 추출할 수 없습니다.');
         return;
       }
 
-      final String? result =
-      await QrVerificationService.sendQrImageForVerification(bytes);
+      final result = await QrVerificationService.sendQrImageForVerification(bytes);
       if (result == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('서버 응답 실패')),
-        );
+        _showError('서버 응답 실패');
         return;
       }
 
-      QrResultHandler.handleQrVerificationResult(context, result, url);
+      final status = result['status']!;
+      final parsedUrl = result['url']!;
+
+      if (status == 'INVALID_QR') {
+        _showRetryDialog();
+        return;
+      }
+
+      QrResultHandler.handleQrVerificationResult(context, status, parsedUrl);
     } catch (e) {
-      print('❌ QR 자동 분석 실패: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('QR 처리 중 오류 발생')),
-      );
+      _showError('QR 처리 중 오류 발생');
     }
+  }
+
+  void _showRetryDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text('❌ 올바르지 않은 QR 코드'),
+        content: const Text('QR 코드를 정확히 촬영해주세요.\n다시 시도하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              setState(() {
+                _hasAnalyzed = false;
+                _isLoading = false;
+                _isCameraInitialized = false;
+              });
+              await _initializeCamera();
+            },
+            child: const Text('재시도'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _pickImageFromGallery() async {
@@ -83,108 +118,6 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
         const SnackBar(content: Text('이미지를 불러왔습니다')),
       );
     }
-  }
-
-  void _showResultSelector() {
-    String selectedType = 'safe';
-
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    '분석 결과 선택',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  RadioListTile(
-                    title: const Text('안전'),
-                    value: 'safe',
-                    groupValue: selectedType,
-                    onChanged: (value) =>
-                        setState(() => selectedType = value.toString()),
-                  ),
-                  RadioListTile(
-                    title: const Text('주의'),
-                    value: 'warning',
-                    groupValue: selectedType,
-                    onChanged: (value) =>
-                        setState(() => selectedType = value.toString()),
-                  ),
-                  RadioListTile(
-                    title: const Text('위험'),
-                    value: 'danger',
-                    groupValue: selectedType,
-                    onChanged: (value) =>
-                        setState(() => selectedType = value.toString()),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        if (selectedType == 'safe') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => QrResultSafeScreen(
-                                url: scannedUrl ?? '',
-                              ),
-                            ),
-                          );
-                        } else if (selectedType == 'warning') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => QrResultWarningScreen(
-                                url: scannedUrl ?? '',
-                                reportCount: 17,
-                              ),
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  QrResultDangerScreen(url: scannedUrl ?? ''),
-                            ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1AD282),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        '결과 확인',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   @override
@@ -249,7 +182,14 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(26),
                         child: _isCameraInitialized
-                            ? CameraPreview(_cameraController)
+                            ? (_isLoading
+                            ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D26A)),
+                            strokeWidth: 5,
+                          ),
+                        )
+                            : CameraPreview(_cameraController))
                             : const Center(child: CircularProgressIndicator()),
                       ),
                     ),
@@ -276,8 +216,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text('사진에서 불러오기',
-                            style: TextStyle(fontSize: 16)),
+                        child: const Text('사진에서 불러오기', style: TextStyle(fontSize: 16)),
                       ),
                     ),
                   ),

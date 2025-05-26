@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:qrust/widgets/upper_navbar.dart';
 
 class QrResultSafeScreen extends StatelessWidget {
@@ -131,8 +131,15 @@ class QrResultSafeScreen extends StatelessWidget {
                               child: SizedBox(
                                 height: 50,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    // TODO: url_launcher로 열기
+                                  onPressed: () async {
+                                    final uri = Uri.parse(url);
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('⚠️ URL을 열 수 없습니다.')),
+                                      );
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF1AD282),

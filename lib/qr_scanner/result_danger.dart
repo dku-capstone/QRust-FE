@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:qrust/widgets/upper_navbar.dart';
 
 class QrResultDangerScreen extends StatelessWidget {
@@ -127,8 +128,15 @@ class QrResultDangerScreen extends StatelessWidget {
                               child: SizedBox(
                                 height: 50,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    // TODO: 접속 제한 / 경고
+                                  onPressed: () async {
+                                    final uri = Uri.parse(url);
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('⚠️ URL을 열 수 없습니다.')),
+                                      );
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,

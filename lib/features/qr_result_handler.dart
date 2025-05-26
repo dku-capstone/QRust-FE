@@ -21,15 +21,12 @@ class QrResultHandler {
         break;
 
       case 'AI_MODEL_BLOCKED':
-      case 'GOOGLE_BLOCKED':
-      // ⛔ 위험 결과 화면으로 이동
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => QrResultDangerScreen(url: url)),
         );
         break;
-
-      case 'REPORT_BLACKLISTED':
+      case 'GOOGLE_BLOCKED':
       // ⚠️ 블랙리스트 팝업 차단
         showDialog(
           context: context,
@@ -45,6 +42,15 @@ class QrResultHandler {
           ),
         );
         break;
+        
+
+      case 'REPORT_BLACKLISTED':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => QrResultWarningScreen(url: url, reportCount: 1,)),
+        );
+        break;
+      
 
       case 'INVALID_QR':
       default:
