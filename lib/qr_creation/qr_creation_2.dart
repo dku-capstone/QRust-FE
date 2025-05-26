@@ -22,7 +22,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
 
   bool get _canProceed =>
       urlController.text.trim().isNotEmpty &&
-      titleController.text.trim().isNotEmpty;
+          titleController.text.trim().isNotEmpty;
 
   Future<void> _onGeneratePressed() async {
     if (!_canProceed) {
@@ -36,7 +36,8 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
 
     try {
       final api = QrCreationApi();
-      await api.generateQrCode(
+      // ✅ 보정된 URL을 받아서 넘깁니다
+      final fixedUrl = await api.generateQrCode(
         url: urlController.text.trim(),
         title: titleController.text.trim(),
       );
@@ -44,7 +45,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
         context,
         MaterialPageRoute(
           builder: (_) => QrResultScreen(
-            url: urlController.text.trim(),
+            url: fixedUrl, // ✅ 여기만 고쳐짐
             title: titleController.text.trim(),
             password: enablePassword ? passwordController.text.trim() : null,
           ),
@@ -52,7 +53,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('QR 코드 생성 실패: \$e')),
+        SnackBar(content: Text('QR 코드 생성 실패: $e')),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -121,10 +122,9 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // URL 입력 박스
                           Container(
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.green),
+                              border: Border.all(color: Color(0xFF1AD282)),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.all(16),
@@ -143,7 +143,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                   'QR에 삽입할 URL을 입력해 주세요.',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[600],
+                                    color: Colors.grey,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -154,8 +154,8 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                     hintText: '예: https://jhiob.tistory.com/',
                                     border: OutlineInputBorder(),
                                     focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: Colors.green, width: 2),
+                                      borderSide:
+                                      BorderSide(color: Color(0xFF1AD282), width: 2),
                                     ),
                                   ),
                                 ),
@@ -163,10 +163,9 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // 제목 입력 박스
                           Container(
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.green),
+                              border: Border.all(color: Color(0xFF1AD282)),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.all(16),
@@ -185,7 +184,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                   'QR 코드의 이름을 지정해 주세요.',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[600],
+                                    color: Colors.grey,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -195,8 +194,8 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                     hintText: '예: QRust QR Code',
                                     border: OutlineInputBorder(),
                                     focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: Colors.green, width: 2),
+                                      borderSide:
+                                      BorderSide(color: Color(0xFF1AD282), width: 2),
                                     ),
                                   ),
                                 ),
@@ -204,13 +203,13 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // 비밀번호 설정
                           Row(
                             children: [
                               Checkbox(
                                 value: enablePassword,
-                                onChanged: (value) => setState(() => enablePassword = value!),
-                                activeColor: Colors.green,
+                                onChanged: (value) =>
+                                    setState(() => enablePassword = value!),
+                                activeColor: Color(0xFF1AD282),
                               ),
                               const Text('비밀번호 설정'),
                             ],
@@ -224,7 +223,8 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                 labelText: '비밀번호',
                                 border: OutlineInputBorder(),
                                 focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.green, width: 2),
+                                  borderSide:
+                                  BorderSide(color: Color(0xFF1AD282), width: 2),
                                 ),
                               ),
                             ),
@@ -237,7 +237,6 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                 ),
               ),
             ),
-            // 하단 버튼: 중앙 정렬, FractionallySizedBox로 widthFactor 0.9 적용
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               child: Center(
@@ -248,7 +247,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _onGeneratePressed,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Color(0xFF1AD282),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -256,9 +255,13 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
-                              '생성하기',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
+                        '생성하기',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),

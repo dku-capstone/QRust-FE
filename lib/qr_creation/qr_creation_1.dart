@@ -91,7 +91,7 @@ class _QrTypeSelectionScreenState extends State<QrTypeSelectionScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                              color: isSelected ? Colors.green : Colors.grey.shade300,
+                              color: isSelected ? Color(0xFF1AD282) : Colors.grey.shade300,
                               width: 2,
                             ),
                           ),
@@ -101,7 +101,7 @@ class _QrTypeSelectionScreenState extends State<QrTypeSelectionScreen> {
                               children: [
                                 Icon(
                                   typeInfo['icon'] as IconData,
-                                  color: isSelected ? Colors.green : Colors.black,
+                                  color: isSelected ? Color(0xFF1AD282) : Colors.black,
                                   size: 28,
                                 ),
                                 const SizedBox(width: 16),
@@ -121,7 +121,7 @@ class _QrTypeSelectionScreenState extends State<QrTypeSelectionScreen> {
                                   ),
                                 ),
                                 if (isSelected)
-                                  const Icon(Icons.check_circle, color: Colors.green)
+                                  const Icon(Icons.check_circle, color: Color(0xFF1AD282))
                               ],
                             ),
                           ),
@@ -155,7 +155,7 @@ class _QrTypeSelectionScreenState extends State<QrTypeSelectionScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Color(0xFF1AD282),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: const Text(

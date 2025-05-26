@@ -1,9 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:qrust/widgets/upper_navbar.dart';
 import 'package:qrust/home/home_screen.dart';
 
-class QrResultScreen extends StatelessWidget {
-  /// 서버에서 생성된 QR 이미지 URL
+class QrResultScreen extends StatefulWidget {
   final String url;
   final String title;
   final String? password;
@@ -16,6 +17,38 @@ class QrResultScreen extends StatelessWidget {
   });
 
   @override
+  State<QrResultScreen> createState() => _QrResultScreenState();
+}
+
+class _QrResultScreenState extends State<QrResultScreen> {
+  Uint8List? imageBytes;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchQrImage();
+  }
+
+  Future<void> _fetchQrImage() async {
+    try {
+      final response = await http.get(Uri.parse(widget.url));
+      if (response.statusCode == 200) {
+        setState(() {
+          imageBytes = response.bodyBytes;
+          isLoading = false;
+        });
+      } else {
+        print("❌ 이미지 응답 실패: ${response.statusCode}");
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      print("❌ 예외 발생: $e");
+      setState(() => isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -25,8 +58,6 @@ class QrResultScreen extends StatelessWidget {
           children: [
             NavigationAppBar(scaffoldKey: GlobalKey<ScaffoldState>()),
             const SizedBox(height: 20),
-
-            // step 안내
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.0),
               child: Align(
@@ -38,18 +69,12 @@ class QrResultScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-
-            // 성공 메시지
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.0),
               child: Center(
                 child: Text(
-                  'QR 코드를 생성하였습니다!',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  'QR 코드가 생성되었습니다!',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -65,97 +90,101 @@ class QrResultScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 45),
 
-            // 네트워크 이미지로 QR 코드 출력
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
+            // ✅ QR 이미지 박스 (그라데이션 테두리 적용)
+            FractionallySizedBox(
+              widthFactor: 0.7,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  padding: const EdgeInsets.all(8), // 테두리 두께
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF00D26A), Color(0xFF00B4D8)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        url,
-                        width: 180,
-                        height: 180,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.error_outline,
-                          size: 80,
-                          color: Colors.red,
+                    borderRadius: BorderRadius.circular(55),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(50),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 15,
+                          offset: Offset(0, 3),
                         ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: isLoading
+                            ? const CircularProgressIndicator()
+                            : imageBytes != null
+                            ? Image.memory(
+                          imageBytes!,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                          height: double.infinity,
+                          alignment: Alignment.center,
+                        )
+                            : const Icon(Icons.error, size: 64, color: Colors.red),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('제목: \$title', style: const TextStyle(fontSize: 16)),
-                          const SizedBox(height: 8),
-                          Text('URL: \$url', style: const TextStyle(fontSize: 16)),
-                          if (password != null && password!.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text('비밀번호: \$password', style: const TextStyle(fontSize: 16)),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 36),
 
-            // 다운로드 & 공유 버튼
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: 다운로드 기능 구현
-                  },
-                  icon: const Icon(Icons.download, color: Colors.green),
-                  label: const Text('다운로드', style: TextStyle(color: Colors.green)),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.green),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            // ✅ 버튼
+            FractionallySizedBox(
+              widthFactor: 0.7,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // TODO: 다운로드 기능
+                      },
+                      icon: const Icon(Icons.download, color: Color(0xFF1AD282)),
+                      label: const Text('다운로드', style: TextStyle(color: Color(0xFF1AD282))),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Color(0xFF1AD282)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: 공유하기 기능 구현
-                  },
-                  icon: const Icon(Icons.share, color: Colors.green),
-                  label: const Text('공유하기', style: TextStyle(color: Colors.green)),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.green),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // TODO: 공유 기능
+                      },
+                      icon: const Icon(Icons.share, color: Color(0xFF1AD282)),
+                      label: const Text('공유하기', style: TextStyle(color: Color(0xFF1AD282))),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Color(0xFF1AD282)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             const Spacer(),
+
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: FractionallySizedBox(
@@ -171,8 +200,8 @@ class QrResultScreen extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: Color(0xFF1AD282),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     child: const Text(
                       '홈으로 돌아가기',

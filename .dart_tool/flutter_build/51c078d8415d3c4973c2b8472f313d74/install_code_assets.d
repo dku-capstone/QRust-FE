@@ -1,1 +1,0 @@
- C:\\Users\\USER\\StudioProjects\\QRust\\.dart_tool\\flutter_build\\51c078d8415d3c4973c2b8472f313d74\\native_assets.json: 

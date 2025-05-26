@@ -3,7 +3,9 @@ import 'package:qrust/widgets/navigation_appbar.dart';
 import 'package:qrust/widgets/drawer_menu.dart';
 import 'package:qrust/widgets/lower_navbar.dart';
 import 'package:qrust/qr_creation/qr_creation_1.dart';
-import 'package:qrust/qr_storage/qr_storage_screen.dart'; // ✅ 보관함 화면 import
+import 'package:qrust/qr_storage/qr_storage_screen.dart';
+import 'package:qrust/qr_scanner/qr_scanner_screen.dart';
+import 'package:qrust/report/report_form_screen.dart'; // ✅ 신고 화면 import 추가
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -33,35 +35,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
     _welcomeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-
     _nameController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-
     _welcomeOffset = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _welcomeController, curve: Curves.easeOut));
-
     _nameOffset = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _nameController, curve: Curves.easeOut));
-
     _welcomeOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _welcomeController, curve: Curves.easeOut),
     );
-
     _nameOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _nameController, curve: Curves.easeOut),
     );
-
     _welcomeController.forward();
     Future.delayed(const Duration(milliseconds: 500), () => _nameController.forward());
   }
@@ -161,9 +156,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               child: AnimatedScale(
                                 scale: _buttonScales['qrscan'] ?? 1.0,
                                 duration: const Duration(milliseconds: 100),
-                                child: _buildScanCreateButton(
-                                  label: 'QR 스캔하기',
-                                  icon: Icons.qr_code_scanner,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const QrScannerScreen()),
+                                    );
+                                  },
+                                  child: _buildScanCreateButton(
+                                    label: 'QR 스캔하기',
+                                    icon: Icons.qr_code_scanner,
+                                  ),
                                 ),
                               ),
                             ),
@@ -206,7 +209,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: _buildSimpleButton(
                             icon: Icons.report,
                             label: '피싱 신고',
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ReportFormScreen()),
+                              );
+                            },
                             keyId: 'report',
                           ),
                         ),
