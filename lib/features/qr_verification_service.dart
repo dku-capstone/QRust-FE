@@ -25,6 +25,7 @@ class QrVerificationService {
         return {
           'status': status,
           'url': url,
+          'reportCount': json['data']['reportCount']?.toString() ?? '0',
         };
       } else {
         return null;

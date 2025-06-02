@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'emailsignup_screen.dart'; // 파일 이름 수정됨
+import 'emailsignup_screen.dart';
 import 'login_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -108,78 +108,65 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             ),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.only(left: 40.0, right: 24.0, bottom: 32.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'SNS 계정으로 간편 가입하기',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
-                    ),
+                  const Text(
+                    'SNS 계정으로 간편 가입하기',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
-                  const SizedBox(height: 40),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedCircleButton(
-                          icon: Icons.email,
-                          backgroundColor: Colors.blueAccent,
-                          size: 72,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const EmailSignupScreen()),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        AnimatedCircleButton(
-                          iconAsset: 'assets/api/kakao.png',
-                          backgroundColor: const Color(0xFFFFE812),
-                          size: 72,
-                          onTap: () {},
-                        ),
-                        const SizedBox(width: 16),
-                        AnimatedCircleButton(
-                          iconAsset: 'assets/api/naver.png',
-                          backgroundColor: const Color(0xFF03C75A),
-                          size: 72,
-                          onTap: () {},
-                        ),
-                        const SizedBox(width: 16),
-                        AnimatedCircleButton(
-                          iconAsset: 'assets/api/google.png',
-                          backgroundColor: const Color(0xFFF5F5F5),
-                          size: 72,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 36),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
-                      child: OutlinedButton(
-                        onPressed: () {
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedCircleButton(
+                        icon: Icons.email,
+                        backgroundColor: Colors.blueAccent,
+                        size: 60,
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            MaterialPageRoute(builder: (_) => const EmailSignupScreen()),
                           );
                         },
-                        style: OutlinedButton.styleFrom(
-                          shape: const StadiumBorder(),
-                          foregroundColor: Colors.black,
-                        ),
-                        child: const Text('이미 계정이 있으신가요?'),
                       ),
+                      const SizedBox(width: 16),
+                      AnimatedCircleButton(
+                        iconAsset: 'assets/api/kakao.png',
+                        backgroundColor: const Color(0xFFFFE812),
+                        size: 60,
+                        onTap: () {},
+                      ),
+                      const SizedBox(width: 16),
+                      AnimatedCircleButton(
+                        iconAsset: 'assets/api/naver.png',
+                        backgroundColor: const Color(0xFF03C75A),
+                        size: 60,
+                        onTap: () {},
+                      ),
+                      const SizedBox(width: 16),
+                      AnimatedCircleButton(
+                        iconAsset: 'assets/api/google.png',
+                        backgroundColor: const Color(0xFFF5F5F5),
+                        size: 60,
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      foregroundColor: Colors.black,
                     ),
+                    child: const Text('이미 계정이 있으신가요?'),
                   ),
                 ],
               ),

@@ -34,12 +34,10 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       _isCameraInitialized = true;
       _isLoading = false;
     });
-
-    _triggerAutoQrAnalysisOnce();
   }
 
-  Future<void> _triggerAutoQrAnalysisOnce() async {
-    if (_hasAnalyzed) return;
+  Future<void> _analyzeQrFromCamera() async {
+    if (_hasAnalyzed || !_isCameraInitialized) return;
     _hasAnalyzed = true;
 
     setState(() {
@@ -50,7 +48,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       final file = await _cameraController.takePicture();
       final bytes = await file.readAsBytes();
 
-      await _cameraController.dispose(); // 분석 중 카메라 정지
+      await _cameraController.dispose();
 
       final String? url = await QrDecoderUtil.decodeQrFromImagePath(file.path);
       if (url == null) {
@@ -66,15 +64,61 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
       final status = result['status']!;
       final parsedUrl = result['url']!;
+      final reportCount = int.tryParse(result['reportCount'] ?? '0') ?? 0;
 
       if (status == 'INVALID_QR') {
         _showRetryDialog();
         return;
       }
 
-      QrResultHandler.handleQrVerificationResult(context, status, parsedUrl);
+      QrResultHandler.handleQrVerificationResult(context, status, parsedUrl, reportCount);
     } catch (e) {
       _showError('QR 처리 중 오류 발생');
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile == null) return;
+
+    setState(() {
+      _isLoading = true;
+      _hasAnalyzed = true;
+    });
+
+    try {
+      final bytes = await pickedFile.readAsBytes();
+
+      final String? url = await QrDecoderUtil.decodeQrFromImagePath(pickedFile.path);
+      if (url == null) {
+        _showError('QR 코드에서 URL을 추출할 수 없습니다.');
+        return;
+      }
+
+      final result = await QrVerificationService.sendQrImageForVerification(bytes);
+      if (result == null) {
+        _showError('서버 응답 실패');
+        return;
+      }
+
+      final status = result['status']!;
+      final parsedUrl = result['url']!;
+      final reportCount = int.tryParse(result['reportCount'] ?? '0') ?? 0;
+
+      if (status == 'INVALID_QR') {
+        _showRetryDialog();
+        return;
+      }
+
+      QrResultHandler.handleQrVerificationResult(context, status, parsedUrl, reportCount);
+    } catch (e) {
+      _showError('QR 처리 중 오류 발생');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -108,16 +152,6 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
     setState(() {
       _isLoading = false;
     });
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지를 불러왔습니다')),
-      );
-    }
   }
 
   @override
@@ -207,6 +241,29 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                     child: SizedBox(
                       height: 50,
                       child: ElevatedButton(
+                        onPressed: _isLoading ? null : _analyzeQrFromCamera,
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: const Color(0xFF00D26A),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                            : const Text('QR 분석하기', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  FractionallySizedBox(
+                    widthFactor: 0.9,
+                    child: SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
                         onPressed: _pickImageFromGallery,
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.black,
@@ -229,3 +286,4 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
     );
   }
 }
+

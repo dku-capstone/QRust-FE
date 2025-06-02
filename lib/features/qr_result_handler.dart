@@ -5,7 +5,12 @@ import 'package:qrust/qr_scanner/result_warning.dart';
 import 'package:qrust/qr_scanner/result_danger.dart';
 
 class QrResultHandler {
-  static void handleQrVerificationResult(BuildContext context, String result, String url) {
+  static void handleQrVerificationResult(
+      BuildContext context,
+      String result,
+      String url, [
+        int reportCount = 0, // 기본값 0
+      ]) {
     switch (result) {
       case 'TRUSTED_QR':
       // 🔗 신뢰된 QR → 웹사이트로 바로 이동
@@ -21,11 +26,13 @@ class QrResultHandler {
         break;
 
       case 'AI_MODEL_BLOCKED':
+      // ❌ AI 모델 차단 → 위험 화면
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => QrResultDangerScreen(url: url)),
         );
         break;
+
       case 'GOOGLE_BLOCKED':
       // ⚠️ 블랙리스트 팝업 차단
         showDialog(
@@ -42,15 +49,16 @@ class QrResultHandler {
           ),
         );
         break;
-        
 
       case 'REPORT_BLACKLISTED':
+      // ⚠️ 신고 누적 → 경고 화면
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => QrResultWarningScreen(url: url, reportCount: 1,)),
+          MaterialPageRoute(
+            builder: (_) => QrResultWarningScreen(url: url, reportCount: reportCount),
+          ),
         );
         break;
-      
 
       case 'INVALID_QR':
       default:
