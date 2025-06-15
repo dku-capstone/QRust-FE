@@ -19,15 +19,17 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
   final TextEditingController passwordController = TextEditingController();
   bool enablePassword = false;
   bool _isLoading = false;
+  bool _isVerified = false;
 
   bool get _canProceed =>
       urlController.text.trim().isNotEmpty &&
-          titleController.text.trim().isNotEmpty;
+          titleController.text.trim().isNotEmpty &&
+          _isVerified;
 
   Future<void> _onGeneratePressed() async {
     if (!_canProceed) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('필수 항목을 모두 입력해주세요.')),
+        const SnackBar(content: Text('필수 항목을 모두 입력하고 검증을 완료해주세요.')),
       );
       return;
     }
@@ -36,7 +38,6 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
 
     try {
       final api = QrCreationApi();
-      // ✅ 보정된 URL을 받아서 넘깁니다
       final fixedUrl = await api.generateQrCode(
         url: urlController.text.trim(),
         title: titleController.text.trim(),
@@ -45,7 +46,7 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
         context,
         MaterialPageRoute(
           builder: (_) => QrResultScreen(
-            url: fixedUrl, // ✅ 여기만 고쳐짐
+            url: fixedUrl,
             title: titleController.text.trim(),
             password: enablePassword ? passwordController.text.trim() : null,
           ),
@@ -147,17 +148,70 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                TextField(
-                                  controller: urlController,
-                                  keyboardType: TextInputType.url,
-                                  decoration: const InputDecoration(
-                                    hintText: '예: https://jhiob.tistory.com/',
-                                    border: OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                      BorderSide(color: Color(0xFF1AD282), width: 2),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: urlController,
+                                        keyboardType: TextInputType.url,
+                                        onChanged: (_) => setState(() {}),
+                                        decoration: const InputDecoration(
+                                          hintText: '예: https://jhiob.tistory.com/',
+                                          border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Color(0xFF1AD282),
+                                                width: 2),
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    SizedBox(
+                                      width: 56,
+                                      height: 56,
+                                      child: ElevatedButton(
+                                        onPressed: urlController.text
+                                            .trim()
+                                            .isEmpty
+                                            ? null
+                                            : () {
+                                          // TODO: 검증 로직 연동
+                                          setState(() {
+                                            _isVerified = true;
+                                          });
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content:
+                                                Text('검증이 완료되었습니다.')),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: urlController.text
+                                              .trim()
+                                              .isEmpty
+                                              ? Colors.grey
+                                              : (_isVerified
+                                              ? const Color(0xFF1AD282)
+                                              : Colors.red),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(8),
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                        child: const Text(
+                                          '검증',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -194,8 +248,8 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                     hintText: '예: QRust QR Code',
                                     border: OutlineInputBorder(),
                                     focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                      BorderSide(color: Color(0xFF1AD282), width: 2),
+                                      borderSide: BorderSide(
+                                          color: Color(0xFF1AD282), width: 2),
                                     ),
                                   ),
                                 ),
@@ -223,8 +277,8 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
                                 labelText: '비밀번호',
                                 border: OutlineInputBorder(),
                                 focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                  BorderSide(color: Color(0xFF1AD282), width: 2),
+                                  borderSide: BorderSide(
+                                      color: Color(0xFF1AD282), width: 2),
                                 ),
                               ),
                             ),
@@ -238,16 +292,21 @@ class _QrCreationStep2ScreenState extends State<QrCreationStep2Screen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               child: Center(
                 child: FractionallySizedBox(
                   widthFactor: 0.9,
                   child: SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _onGeneratePressed,
+                      onPressed: _isLoading || !_canProceed
+                          ? null
+                          : _onGeneratePressed,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF1AD282),
+                        backgroundColor: _canProceed
+                            ? const Color(0xFF1AD282)
+                            : Colors.grey,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
